@@ -37,7 +37,7 @@ fn main() {
         let (width, height) = esperanto.dimensions();
 
         let save_video = |image: &DynamicImage, frame: u32| {
-            let name=format!("{id}-{frame}.png");
+            let name = format!("{id}-{frame}.png");
             image
                 .save(format!("{dir_out}/{name}"))
                 .expect(&format!("save image {name}"));
@@ -79,13 +79,16 @@ const PADDING_AMOUNT: f32 = 0.009;
 /// Used to crop initial padding, which can be any amount
 const MIN_WHITE_THRESHOLD: u8 = 100;
 
-fn make_unsquare(image: DynamicImage) -> DynamicImage {
+fn make_unsquare(mut image: DynamicImage) -> DynamicImage {
     let (width, height) = image.dimensions();
+    let long_width = (width as f32 * 1.6) as u32;
 
-    let mut long = ImageBuffer::from_pixel((width as f32 * 1.5) as u32, height / 2, WHITE);
+    let mut long = ImageBuffer::from_pixel(long_width, height / 2, WHITE);
 
     imageops::overlay(&mut long, &image.to_rgba8(), 0, 0);
-    imageops::overlay(&mut long, &image.to_rgba8(), width as i64, 0);
+
+    let second_half = image.crop(0, height / 2 + 12, width / 2, height).to_rgba8();
+    imageops::overlay(&mut long, &second_half, width as i64, 0);
 
     DynamicImage::ImageRgba8(long)
 }
