@@ -18,7 +18,8 @@ fn main() {
     }
     fs::create_dir(dir_out).expect("create out dir");
 
-    let ids = &["0500", "0501", "0502"];
+    let ids = fs::read_to_string("./ids").expect("read ids file");
+    let ids: Vec<_> = ids.lines().collect();
 
     for id in ids {
         let folder = format!("{dir}/{id}");
@@ -27,11 +28,18 @@ fn main() {
 
         println!("{}", id);
 
+        let path = format!("{folder}/esperanto.png");
         let esperanto = convert_image(
-            image::open(format!("{folder}/esperanto.png")).expect("open esperanto image"),
+            image::open(path).expect("open esperanto image"),
         );
+
+        let path = format!("{folder}/english.png");
+        if !Path::new(&path).exists() {
+            println!("    [warning] no english version - skipping");
+            continue;
+        }
         let english = convert_image(
-            image::open(format!("{folder}/english.png")).expect("open english image"),
+            image::open(path).expect("open english image"),
         );
 
         let (width, height) = esperanto.dimensions();
