@@ -22,12 +22,8 @@ fn main() {
 
     for id in ids {
         let folder = format!("{dir}/{id}");
-        let folder_out = format!("{dir_out}/{id}");
 
         assert!(Path::new(&folder).exists(), "cant find input folder");
-        if !Path::new(&folder_out).exists() {
-            fs::create_dir(&folder_out).expect("create out folder ");
-        }
 
         println!("{}", id);
 
@@ -40,27 +36,30 @@ fn main() {
 
         let (width, height) = esperanto.dimensions();
 
-        println!("    frame 0");
+        let save_video = |image: &DynamicImage, frame: u32| {
+            let name=format!("{id}-{frame}.png");
+            image
+                .save(format!("{dir_out}/{name}"))
+                .expect(&format!("save image {name}"));
+        };
+
+        println!("    1 panel");
         let rect = Rect::at(width as i32 / 3, 0).of_size(width, height);
-        draw_filled_rect(&esperanto.to_rgba8(), rect, WHITE)
-            .save(format!("{folder_out}/frame_0.png"))
-            .expect("save frame 0 (1 panel)");
+        let image = draw_filled_rect(&esperanto.to_rgba8(), rect, WHITE);
+        save_video(&image.into(), 0);
 
-        println!("    frame 1");
+        println!("    2 panels");
         let rect = Rect::at(width as i32 * 2 / 3, 0).of_size(width, height);
-        draw_filled_rect(&esperanto.to_rgba8(), rect, WHITE)
-            .save(format!("{folder_out}/frame_1.png"))
-            .expect("save frame 1 (2 panels)");
+        let image = draw_filled_rect(&esperanto.to_rgba8(), rect, WHITE);
+        save_video(&image.into(), 1);
 
-        println!("    frame 2");
-        esperanto
-            .save(format!("{folder_out}/frame_2.png"))
-            .expect("save frame 2 (3 panels)");
+        println!("    3 panels");
+        save_video(&esperanto, 2);
+        save_video(&esperanto, 3);
+        save_video(&esperanto, 4);
 
-        println!("    frame 3");
-        english
-            .save(format!("{folder_out}/frame_3.png"))
-            .expect("save frame 3 (english)");
+        println!("    english");
+        save_video(&english, 4);
     }
 }
 
